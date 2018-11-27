@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <title>fountainJets</title>
+</head>
+
+<body>
+    <!-- Struktura strony -->
+
+    <div class="container">
+
+
+        <div class="row mt-5">
+
+            <div class="col-2">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Tytuł</th>
+                            <th>Edytuj</th>
+                            <th>Usuń</th>
+                            <th>Wyświetl</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listOfArticles" class="text-center">
+                    </tbody>
+                </table>
+
+            </div>
+
+            <div class="col-md-6 offset-md-3">
+
+                <!-- Formularz dodawania artykułu -->
+                <form id="form">
+
+                    <div class="form-group">
+                        <label for="title">Tytuł</label>
+                        <input class="form-control" type="text" id="title" placeholder="Wpisz tytuł">
+                    </div>
+
+                    <div id="headers">
+
+                        <div class="header">
+
+                            <div class="form-group">
+                                <label>Naglowek 1</label>
+                                <input class="form-control" type="text" id="header0" placeholder="Wpisz treść nagłowka">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Treść</label>
+                                <textarea class="form-control" id="message0" rows="5" placeholder="Wpisz treść"></textarea>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="author">Autor</label>
+                        <select class="form-control" id="author">
+                            <option>Krystian Śledź</option>
+                            <option>Kinga Florek</option>
+                            <option>Paweł Oczadly</option>
+                        </select>
+                    </div>
+
+                </form>
+
+                <!-- Przyciski odpowiednie za dodawanie i usuwanie nagłowkow -->
+
+                <div class="row">
+
+                    <div class="col-6">
+                        <button class="btn btn-success btn-block mt-5" type="button" onclick="addHeader()">Dodaj nagłowek</button>
+                    </div>
+
+                    <div class="col-6">
+                        <button class="btn btn-danger btn-block mt-5" type="button" onclick="removeHeader()">Usuń nagłowek</button>
+                    </div>
+
+                </div>
+
+                <button class="btn btn-primary btn-block mt-5" type="button" onclick="addArticle()">Dodaj nowy artykuł</button>
+
+                <div id="editArticleBtn"></div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Miejsce na artykuł -->
+    <article class="container col-md-8 my-5" id="article"></article>
+
+    <script>
+        var ARTICLES = [];
+
+        // Funkcja pozwalająca łatwo dodawać atrybuty do elementow
+        function setAttributes(el, attrs) {
+            for (var key in attrs) {
+                el.setAttribute(key, attrs[key]);
+            }
+        }
+
+        // Funkcja, ktora dodaje nagłowek
+
+        function addHeader() {
+
+            /* 
+            Chcemy za każdym razem dodać taką część kodu do naszych nagłowkow:
+            
+            1. <div class="header">
+            
+                2. <div class="form-group">                        
+                    3. <label>Naglowek 1</label>
+                    4. <input class="form-control" type="text" id="header0" placeholder="Wpisz treść nagłowka">
+                </div>
+
+               5.  <div class="form-group">
+                    6. <label>Treść</label>
+                    7. <textarea class="form-control" id="message0" rows="5" placeholder="Wpisz treść"></textarea>
+                </div>
+
+            </div>
+            
+            */
+
+
+            // Tworzymy 1.
+
+            var headerDiv = document.createElement("DIV");
+            headerDiv.className = "header";
+
+            // FormGroup naglowek
+
+            // Tworzymy 2. / dodajemy klasę
+
+            var formGroupHeader = document.createElement("DIV");
+            formGroupHeader.className = "form-group";
+
+            // Tworzymy 3. / dodajemy numer / dodajemy tekst, ktory następnie wrzucamy do 3.
+
+            var formGroupHeaderLabel = document.createElement("LABEL");
+            var textNode = "Nagłowek " + (document.getElementById("headers").childElementCount + 1);
+            var formGroupHeaderLabelTextNode = document.createTextNode(textNode);
+            formGroupHeaderLabel.appendChild(formGroupHeaderLabelTextNode);
+
+            // Tworzymy 4. / dodajemy wszystkie atrybuty (tutaj przydaje się funkcja setAttributes())
+
+            var formGroupHeaderInput = document.createElement("INPUT");
+            setAttributes(formGroupHeaderInput, {
+                "class": "form-control",
+                "id": "header" + document.getElementById("headers").childElementCount,
+                "type": "text",
+                "placeholder": "Wpisz treść nagłowka"
+            });
+
+            // 3. i 4. wrzucamy do 2.
+
+            formGroupHeader.appendChild(formGroupHeaderLabel);
+            formGroupHeader.appendChild(formGroupHeaderInput);
+
+
+            // FormGroup treść
+
+            // Tworzymy 5. / dodajemy klasę
+
+            var formGroupMessage = document.createElement("DIV");
+            formGroupMessage.className = "form-group";
+
+            // Tworzymy 6. / dodajemy tekst, ktory wrzucamy do 6.
+
+            var formGroupMessageLabel = document.createElement("LABEL");
+            var formGroupMessageLabelTextNode = document.createTextNode("Treść");
+            formGroupMessageLabel.appendChild(formGroupMessageLabelTextNode);
+
+            // Tworzymy 7. / dodajemy wszystkie atrybuty (tutaj przydaje się funkcja setAttributes())
+
+            var formGroupMessageTextarea = document.createElement("TEXTAREA");
+            setAttributes(formGroupMessageTextarea, {
+                "class": "form-control",
+                "id": "message" + document.getElementById("headers").childElementCount,
+                "rows": 5,
+                "placeholder": "Wpisz treść"
+            });
+
+            // 6. i 7. wrzucamy do 5.
+
+            formGroupMessage.appendChild(formGroupMessageLabel);
+            formGroupMessage.appendChild(formGroupMessageTextarea);
+
+            // 2. i 5. wrzucamy do 1.
+
+            headerDiv.appendChild(formGroupHeader);
+            headerDiv.appendChild(formGroupMessage);
+
+            // 1. wrzucamy do naszych nagłowkow
+
+            document.getElementById("headers").appendChild(headerDiv);
+        }
+
+        // Funkcja, ktora usuwa ostatni nagłowek
+
+        function removeHeader() {
+            var headers = document.getElementById("headers");
+            headers.removeChild(headers.lastChild);
+        }
+
+        // Dodajemy artykuł
+
+        function addArticle() {
+
+            // Tworzymy dwie tablice przechowujące nagłowki i treść
+
+            var headers = [],
+                messages = [];
+
+            // Pobieramy dane z inputow
+
+            for (var i = 0; i < document.getElementById("headers").childElementCount; i++) {
+                headers.push(document.getElementById("header" + i).value);
+                messages.push(document.getElementById("message" + i).value);
+
+            }
+
+            // Pobieramy datę
+
+            var d = new Date;
+            var date = "";
+            if (d.getHours() < 10) {
+                date += "0" + d.getHours() + ":";
+            } else {
+                date += d.getHours() + ":";
+            }
+            if (d.getMinutes() < 10) {
+                date += "0" + d.getMinutes() + ":";
+            } else {
+                date += d.getMinutes() + ":";
+            }
+            if (d.getSeconds() < 10) {
+                date += "0" + d.getSeconds() + ":";
+            } else {
+                date += d.getSeconds() + "\xa0\xa0\xa0";
+            }
+            if (d.getDate() < 10) {
+                date += "0" + d.getDate() + ".";
+            } else {
+                date += d.getDate() + ".";
+            }
+            if (d.getMonth() < 9) {
+                date += "0" + (d.getMonth() + 1) + ".";
+            } else {
+                date += (d.getMonth() + 1) + ".";
+            }
+            date += d.getFullYear();
+
+            // Tworzymy obiekt article
+
+            var article = {
+                title: document.getElementById("title").value,
+                header: headers,
+                message: messages,
+                author: document.getElementById("author").value,
+                date: date
+            }
+
+            // Wywołujemy funkje getJSON i przekazujemy w niej już zamieniony obiekt article na tekst JSON
+
+            ARTICLES.push(article);
+
+            console.log(article);
+            console.log(ARTICLES[0]);
+
+            loadList();
+
+            document.getElementById("form").reset();
+
+            while (document.getElementById("headers").childElementCount > 1) {
+                removeHeader();
+            }
+
+            /* OPCJONALNIE */
+
+            /*
+            var articleJSON = JSON.stringify(article);
+            getJSON(articleJSON);
+            */
+
+            /* var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "http://www.example.com/Demo"); // adres na serwer?
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.send(articleJSON);*/
+        }
+
+        function showArticle(n) {
+
+            document.getElementById("article").innerHTML = "";
+
+            /* var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", "http://www.example.com/Demo?FirstName=Chris&LastName=Minnick");
+            xmlhttp.send(); */
+
+            // Zamieniamy tekst JSON na obiekt article
+
+            var articleObj = ARTICLES[n];
+
+            /* 
+            Chcemy dodać taką część kodu do naszego artykułu:
+            
+            <h1 class="display-3 text-center">*title*</h1> // tytuł
+            
+            */
+
+            // Tworzymy h1 / dodajemy klasy / pobieramy tekst, ktory wrzucamy do h1
+
+            var title = document.createElement("H1");
+            title.className = "display-3 text-center";
+            var titleTextNode = document.createTextNode(articleObj.title);
+            title.appendChild(titleTextNode);
+
+            // h1 wrzucamy do naszego artykulu
+
+            document.getElementById("article").appendChild(title);
+
+            /* 
+            Chcemy za każdym razem dodać taką część kodu do naszego artykułu:
+            
+            1. <h2 class="display-5">*header*</h2>  // nagłowek
+            2. <p class="lead my-4">*message*</p>   // treść
+            
+            */
+
+            for (var i = 0; i < articleObj.header.length; i++) {
+
+                // Tworzymy 1. / dodajem klasę / pobieramy tekst, ktory wrzucamy do 1.
+
+                var header = document.createElement("H2");
+                header.className = "display-5";
+                var headerTextNode = document.createTextNode(articleObj.header[i]);
+                header.appendChild(headerTextNode);
+
+                // Tworzymy 2. / dodajem klasę / pobieramy tekst, ktory wrzucamy do 2.
+
+                var message = document.createElement("P");
+                message.className = "lead my-4";
+                var messageTextNode = document.createTextNode(articleObj.message[i]);
+                message.appendChild(messageTextNode);
+
+                // 1. i 2. wrzucamy do naszego artykułu
+
+                document.getElementById("article").appendChild(header);
+                document.getElementById("article").appendChild(message);
+
+            }
+
+            /* 
+            Chcemy dodać taką część kodu do naszego artykułu:
+            
+            <h2 class="display-5 text-center">*author*</h2> // autor
+            
+            */
+
+            // Tworzymy h2 / dodajemy klasy / pobieramy tekst, ktory wrzucamy do h2
+
+            var author = document.createElement("H2");
+            author.className = "display-5 text-center";
+            var authorTextNode = document.createTextNode(articleObj.author);
+            author.appendChild(authorTextNode);
+
+            // h2 wrzucamy do naszego artykułu
+
+            document.getElementById("article").appendChild(author);
+
+            /* 
+            Chcemy dodać taką część kodu do naszego artykułu:
+            
+            <span>*date*</span> // data
+            
+            */
+
+            // Tworzymy span / pobieramy tekst, ktory wrzucamy do span
+
+            var date = document.createElement("SPAN");
+            var dateTextNode = document.createTextNode(articleObj.date);
+            date.appendChild(dateTextNode);
+
+            // span wrzucamy do naszego arykułu
+
+            document.getElementById("article").appendChild(date);
+
+            console.log(JSON.stringify(ARTICLES));
+
+        }
+
+
+
+        function loadArticle(n) {
+            var articleObj = ARTICLES[n];
+
+
+            document.getElementById("form").innerHTML = '<div class="form-group"><label for="title">Tytuł</label><input class="form-control" type="text" id="title" placeholder="Wpisz tytuł"></div><div id="headers">';
+
+
+            for (var i = 0; i < articleObj.header.length; i++) {
+                document.getElementById("form").innerHTML += '<div class="header"><div class="form-group"><label>Naglowek ' + (i + 1) + '</label><input class="form-control" type="text" id="header' + i + '" placeholder="Wpisz treść nagłowka"></div><div class="form-group"><label>Treść</label><textarea class="form-control" id="message' + i + '" rows="5" placeholder="Wpisz treść"></textarea></div></div>';
+
+
+            }
+
+            document.getElementById("form").innerHTML += '</div><div class="form-group"><label for="author">Autor</label><select class="form-control" id="author"><option>Krystian Śledź</option><option>Kinga Florek</option><option>Paweł Oczadly</option></select></div>';
+
+            document.getElementById("editArticleBtn").innerHTML = '<button class="btn btn-warning btn-block mt-2" type="button" onclick="editArticle(' + n + ')">Edytuj artykuł</button>';
+
+            document.getElementById("title").value = articleObj.title;
+
+            for (var i = 0; i < articleObj.header.length; i++) {
+                console.log("header" + i);
+                document.getElementById("header" + i).value = articleObj.header[0];
+                document.getElementById("message" + i).value = articleObj.message[0];
+            }
+
+            document.getElementById("author").value = articleObj.author;
+
+
+        }
+
+        function editArticle(n) {
+            var headers = [],
+                messages = [];
+
+            // Pobieramy dane z inputow
+
+            for (var i = 0; i < document.getElementById("headers").childElementCount; i++) {
+                headers.push(document.getElementById("header" + i).value);
+                messages.push(document.getElementById("message" + i).value);
+
+            }
+
+            // Pobieramy datę
+
+            var d = new Date;
+            var date = "";
+            if (d.getHours() < 10) {
+                date += "0" + d.getHours() + ":";
+            } else {
+                date += d.getHours() + ":";
+            }
+            if (d.getMinutes() < 10) {
+                date += "0" + d.getMinutes() + ":";
+            } else {
+                date += d.getMinutes() + ":";
+            }
+            if (d.getSeconds() < 10) {
+                date += "0" + d.getSeconds() + ":";
+            } else {
+                date += d.getSeconds() + "\xa0\xa0\xa0";
+            }
+            if (d.getDate() < 10) {
+                date += "0" + d.getDate() + ".";
+            } else {
+                date += d.getDate() + ".";
+            }
+            if (d.getMonth() < 9) {
+                date += "0" + (d.getMonth() + 1) + ".";
+            } else {
+                date += (d.getMonth() + 1) + ".";
+            }
+            date += d.getFullYear();
+
+            // Tworzymy obiekt article
+
+            var article = {
+                title: document.getElementById("title").value,
+                header: headers,
+                message: messages,
+                author: document.getElementById("author").value,
+                date: date
+            }
+
+            // Wywołujemy funkje getJSON i przekazujemy w niej już zamieniony obiekt article na tekst JSON
+
+            ARTICLES[n] = article;
+
+            loadList();
+
+            while (document.getElementById("headers").childElementCount > 1) {
+                removeHeader();
+            }
+
+            document.getElementById("form").reset();
+
+            document.getElementById("editArticleBtn").innerHTML = "";
+
+        }
+
+        function loadList() {
+            document.getElementById("listOfArticles").innerHTML = "";
+
+            for (var i = 0; i < ARTICLES.length; i++) {
+                document.getElementById("listOfArticles").innerHTML += '<tr><th scope="row">' + (i + 1) + '</th><td>' + ARTICLES[i].title + '</td><td><button class="btn btn-warning" type="button" onclick="loadArticle(' + i + ')">&nbsp;</button></td><td><button class="btn btn-danger" type="button" onclick="deleteArticle(' + i + ')">&nbsp;</button></td><td><button class="btn btn-primary" type="button" onclick="showArticle(' + i + ')">&nbsp;</button></td></tr>';
+            }
+
+        }
+
+        function deleteArticle(n) {
+            for (var i = n; i < ARTICLES.length - 1; i++) {
+                ARTICLES[i] = ARTICLES[i + 1];
+            }
+            ARTICLES.splice(-1, 1);
+            loadList();
+
+        }
+
+    </script>
+
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+</body>
+
+</html>
