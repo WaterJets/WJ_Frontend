@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <title>fountainJets</title>
+</head>
+
+<body>
+    <!-- Struktura strony -->
+
+    <div class="container col-md-6  mt-5">
+
+        <!-- Formularz dodawania artykułu -->
+        <form id="form">
+
+            <div class="form-group">
+                <label for="title">Tytuł</label>
+                <input class="form-control" type="text" id="title" placeholder="Wpisz tytuł">
+            </div>
+
+            <div class="form-group">
+                <label for="title">Naglowek</label>
+                <input class="form-control" type="text" id="header" placeholder="Wpisz treść nagłowka">
+            </div>
+
+            <div class="form-group">
+                <label for="content">Treść</label>
+                <textarea class="form-control" id="message" rows="5" placeholder="Wpisz treść"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="author">Autor</label>
+                <select class="form-control" id="author">
+                    <option>Krystian Śledź</option>
+                    <option>Kinga Florek</option>
+                    <option>Paweł Oczadly</option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary btn-block mt-5" type="button" onclick="addArticle()">Wstaw artykuł</button>
+
+        </form>
+
+
+    </div>
+
+    <!-- Miejsce na artykuł -->
+
+    <article class="container col-md-8 mt-5" id="article">
+
+        <h1 class="display-3 text-center" id="titleGet"></h1>
+        <h2 class="display-5" id="headerGet"></h2>
+        <p class="lead my-4" id="messageGet"></p>
+        <h2 class="display-5 text-center" id="authorGet"></h2>
+
+    </article>
+
+    <!-- JavaScript -->
+
+    <script>
+        // Dodajemy artykuł
+
+        function addArticle() {
+
+            // Tworymy obiekt article i pobieramy dane z inputow
+
+            var article = {
+                title: document.getElementById("title").value,
+                header: document.getElementById("header").value,
+                message: document.getElementById("message").value,
+                author: document.getElementById("author").value
+            }
+
+            // Wywołujemy funkje getJSON i przekazujemy w niej już zamieniony obiekt article na tekst JSON
+
+            getJSON(JSON.stringify(article));
+
+            /* OPCJONALNIE */
+
+            /*
+            var articleJSON = JSON.stringify(article);
+            getJSON(articleJSON);
+            */
+
+            /* var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "http://www.example.com/Demo"); // adres na serwer?
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.send(articleJSON);*/
+
+        }
+
+        // Dodajemy treść do szablonu artykułu, ktory jest pusty
+
+        function getJSON(articleJSON) {
+
+            /* var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", "http://www.example.com/Demo?FirstName=Chris&LastName=Minnick");
+            xmlhttp.send(); */
+
+            // Zamieniamy tekst JSON na obiekt article
+
+            var article = JSON.parse(articleJSON);
+
+            // Wstawiamy artykuł
+
+            document.getElementById("titleGet").innerHTML = article.title;
+            document.getElementById("headerGet").innerHTML = article.header;
+            document.getElementById("messageGet").innerHTML = article.message;
+            document.getElementById("authorGet").innerHTML = article.author;
+
+        }
+    </script>
+
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+</body>
+
+</html>
