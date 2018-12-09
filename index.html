@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <title>Panel admina</title>
+
+    <style>
+        .hover:hover {
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+
+<body class="m-0 p-0" onload="loadArticles()">
+
+    <header class="container text-center">
+        <img src="logo.png" alt="" class="my-4 hover" onclick="loadArticles()">
+        <hr class="m-0 mb-3">
+    </header>
+
+    <div class="container w-100">
+        <div class="row">
+            <div class="col-md-2" id="menu">
+                <button class="btn btn-success btn-block" type="button" onclick="newArticle()"><i class="fas fa-plus"></i> Nowy wpis</button>
+                <hr>
+                <button id="wpisy" class="btn btn-outline-secondary btn-block active" type="button" onclick="loadArticles()">Wpisy</button>
+                <button id="autorzy" class="btn btn-outline-secondary btn-block" type="button" onclick="loadAuthors()">Autorzy</button>
+            </div>
+            <div class="col-md-10">
+                <div id="app" class="m-5">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function getAuthorFromServer() {
+            return fetch('https://immense-hollows-56871.herokuapp.com/api/author')
+                .then(response => response.json())
+                .then(json => {
+                    return json
+                })
+        }
+
+        function getArticlesFromServer() {
+            return fetch('https://immense-hollows-56871.herokuapp.com/api/article')
+                .then(response => response.json())
+                .then(json => {
+                    return json
+                })
+        }
+
+        function getArticleFromServer(n) {
+            return fetch('https://immense-hollows-56871.herokuapp.com/api/article/' + n)
+                .then(response => response.json())
+                .then(json => {
+                    return json
+                })
+        }
+
+        function loadArticles() {
+            removeActive();
+            document.getElementById("wpisy").classList.add("active");
+            document.getElementById("app").innerHTML = "";
+            getArticlesFromServer().then((articles) => {
+                getAuthorFromServer().then((authors) => {
+                    for (var i = 0; i < articles.length; i++) {
+                        document.getElementById("app").innerHTML += '<div class="p-3 my-3 bg-light hover" onclick="loadArticle(' + articles[i].id + ')" title="#' + articles[i].id + '"><h2 class="h5">' + articles[i].title + '</h2><p class="lead">' + articles[i].description + '</p><h3 class="text-right h5">' + authors[articles[i].authorId - 1].firstName + " " + authors[articles[i].authorId - 1].surname + '<span class="lead ml-4">' + articles[i].createdAt.substr(0, 10) + '</span></h3></div>';
+                    }
+                });
+            });
+
+        }
+
+
+        function loadAuthors() {
+            removeActive();
+            document.getElementById("autorzy").classList.add("active");
+            document.getElementById("app").innerHTML = "";
+            getAuthorFromServer().then((authors) => {
+                for (var i = 0; i < authors.length; i++) {
+                    document.getElementById("app").innerHTML += '<div class="p-3 my-3 bg-light""><h3 class="h5">' + "#" + authors[i].id + " " + authors[i].firstName + " " + authors[i].surname + '</h3><p class="lead">' + authors[i].description + '</p></div>';
+                }
+            });
+        }
+
+        function loadArticle(n) {
+            var form = "";
+            getArticleFromServer(n).then((article) => {
+                form = '<form id="form"><div class="form-group"><label for="title">Tytuł</label><input class="form-control" type="text" id="title" placeholder="Wpisz tytuł"></div><div class="form-group"><label>Opis</label><input class="form-control" type="text" id="description" placeholder="Krotki opis"></div><div class="form-group"><label>Treść</label><textarea class="form-control" id="content" rows="5" placeholder="Wpisz treść"></textarea></div><div class="form-group"><label for="author">Autor</label><select class="form-control" id="author">'
+                getAuthorFromServer().then((authors) => {
+                    for (var i = 0; i < authors.length; i++) {
+                        form += '<option value="' + (i + 1) + '">' + authors[i].firstName + " " + authors[i].surname + '</option>';
+                    }
+                    form += '</select></div></form><button class="btn btn-primary btn-block" data-toggle="modal" data-target="#myModal" type="button" onclick="showArticle()">Wyświetl</button><button class="btn btn-warning btn-block" type="button" onclick="editArticle(' + n + ')">Edytuj</button><button class="btn btn-danger btn-block" type="button" onclick="deleteArticle(' + n + ')">Usuń</button><div class="modal" id="myModal" aria-hidden="true" style="display: none;"><div class="modal-dialog" style="max-width: 80%"><div class="modal-content"><div class="modal-body"><h2 class="text-center" id="modalTitle"></h2><p id="modalDescription"></p><p class="lead" id="modalContent"></p><h5 class="text-right" id="modalAuthor"></h5></div><div class="modal-footer"><button class="btn btn-secondary" data-dismiss="modal">Zamknij</button></div></div></div></div>'
+                    document.getElementById("app").innerHTML = form;
+                    document.getElementById("title").value = article.title;
+                    document.getElementById("description").value = article.description;
+                    document.getElementById("content").value = article.content;
+                    document.getElementById("author").value = article.authorId;
+                });
+
+            });
+
+        }
+
+        function newArticle() {
+            removeActive();
+            var form = "";
+
+            form = '<form id="form"><div class="form-group"><label for="title">Tytuł</label><input class="form-control" type="text" id="title" placeholder="Wpisz tytuł"></div><div class="form-group"><label>Opis</label><input class="form-control" type="text" id="description" placeholder="Krotki opis"></div><div class="form-group"><label>Treść</label><textarea class="form-control" id="content" rows="5" placeholder="Wpisz treść"></textarea></div><div class="form-group"><label for="author">Autor</label><select class="form-control" id="author">'
+            getAuthorFromServer().then((authors) => {
+                for (var i = 0; i < authors.length; i++) {
+                    form += '<option value="' + (i + 1) + '">' + authors[i].firstName + " " + authors[i].surname + '</option>';
+                }
+                form += '</select></div></form><button class="btn btn-primary btn-block" data-toggle="modal" data-target="#myModal" type="button" onclick="showArticle()">Wyświetl</button><button class="btn btn-success btn-block" type="button" onclick="addArticle()">Dodaj artykuł</button><div class="modal" id="myModal" aria-hidden="true" style="display: none;"><div class="modal-dialog" style="max-width: 80%"><div class="modal-content"><div class="modal-body"><h2 class="text-center" id="modalTitle"></h2><p id="modalDescription"></p><p class="lead" id="modalContent"></p><h5 class="text-right" id="modalAuthor"></h5></div><div class="modal-footer"><button class="btn btn-secondary" data-dismiss="modal">Zamknij</button></div></div></div></div>'
+                document.getElementById("app").innerHTML = form;
+            });
+        }
+
+        function addArticle() {
+            var article = {
+                title: document.getElementById("title").value,
+                authorId: document.getElementById("author").value,
+                content: document.getElementById("content").value,
+                description: document.getElementById("description").value
+            }
+
+            var articleJSON = JSON.stringify(article);
+
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", "https://immense-hollows-56871.herokuapp.com/api/article");
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.send(articleJSON);
+
+            document.getElementById("form").reset();
+        }
+
+        function showArticle() {
+            document.getElementById("modalTitle").innerHTML = document.getElementById("title").value;
+            document.getElementById("modalDescription").innerHTML = document.getElementById("description").value;
+            document.getElementById("modalContent").innerHTML = document.getElementById("content").value;
+            document.getElementById("modalAuthor").innerHTML = document.getElementById("author").options[document.getElementById("author").selectedIndex].text;
+        }
+
+        function editArticle(n) {
+            var article = {
+                title: document.getElementById("title").value,
+                authorId: Number(document.getElementById("author").value),
+                content: document.getElementById("content").value,
+                description: document.getElementById("description").value
+            }
+
+            var articleJSON = JSON.stringify(article);
+
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("PUT", "https://immense-hollows-56871.herokuapp.com/api/article/" + n);
+            xmlhttp.setRequestHeader("Content-Type", "application/json");
+            xmlhttp.send(articleJSON);
+
+        }
+
+        function deleteArticle(n) {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("DELETE", "https://immense-hollows-56871.herokuapp.com/api/article/" + n);
+            xmlhttp.send();
+
+            document.getElementById("form").reset();
+        }
+
+        function removeActive() {
+            var elems = document.getElementById("menu").getElementsByTagName("*");
+            [].forEach.call(elems, function(el) {
+                el.classList.remove("active");
+            });
+        }
+
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</body>
+
+</html>
